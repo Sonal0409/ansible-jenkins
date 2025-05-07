@@ -1,0 +1,25 @@
+---
+- hosts: localhost
+  become: true
+  become_user: root
+  vars:
+   pkg_name: apache2
+   pkg_state: present
+   svc_state: started
+   dest_path: /var/www/html
+  tasks:
+  - name: execute a command
+    command: echo "Start the deployment on apache2 server"
+    notify: Status of command
+  - name: Install {{ pkg_name }}  server
+    package: name={{ pkg_name }} state={{ pkg_state }}
+  - name: Start {{ pkg_name }} service
+    service: name={{ pkg_name }} state={{ svc_state }}
+  - name: Deploy an HTML code on {{ pkg_name }} server
+    copy: src=index.html dest={{ dest_path }}
+    notify: Restart {{ pkg_name }} service
+  handlers:
+  - name: Status of command
+    debug: msg="Command executed successfully"
+  - name: Restart {{ pkg_name }} service
+    service: name={{ pkg_name }} state=restarted
